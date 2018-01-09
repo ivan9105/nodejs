@@ -43,6 +43,77 @@ connection.connect(function (error) {
         console.log("Table customers created: " + JSON.stringify(result));
     });
 
+    connection.query('CREATE TABLE IF NOT EXISTS products (id INT, name VARCHAR(255), PRIMARY KEY (id))', function (error, result) {
+        if (error) {
+            console.log(error);
+            throw error;
+        }
+        console.log("Table products created: " + JSON.stringify(result));
+    });
+
+    connection.query("CREATE TABLE IF NOT EXISTS users (id INT, name VARCHAR(255), favorite_product INT, PRIMARY KEY (id), " +
+        "KEY `favorite_product` (`favorite_product`), " +
+        "CONSTRAINT `fk_users_favorite_product` FOREIGN KEY (`favorite_product`) REFERENCES `products` (`id`))", function (error, result) {
+        if (error) {
+            console.log(error);
+            throw error;
+        }
+        console.log("Table users created: " + JSON.stringify(result));
+    });
+
+    connection.query("SELECT COUNT(id) as productCount FROM products", function (error, result) {
+        if (error) {
+            console.log(error);
+            throw error;
+        }
+        console.log(JSON.stringify(result));
+        console.log(result[0].productCount);
+        if (Number(result[0].productCount) === 0) {
+            console.log("Products not exists");
+            let insertProductsSql = "INSERT INTO products (id, name) VALUES ? ";
+            let productValues = [
+                [154, 'Chocolate Heaven'],
+                [155, 'Tasty Lemons'],
+                [156, 'Vanilla Dreams']
+            ];
+            connection.query(insertProductsSql, [productValues], function (error, result) {
+                if (error) {
+                    console.log(error);
+                    throw error;
+                }
+                console.log("Number of records inserted: " + result.affectedRows);
+            });
+        }
+    });
+
+    connection.query("SELECT COUNT(id) as usersCount FROM users", function (error, result) {
+        if (error) {
+            console.log(error);
+            throw error;
+        }
+        console.log(JSON.stringify(result));
+        console.log(result[0].usersCount);
+
+        if (Number(result[0].usersCount) === 0) {
+            console.log("Users not exists");
+            let insertUsersSql = "INSERT INTO users (id, name, favorite_product) VALUES ? ";
+            let userValues = [
+                [1, 'John', 154],
+                [2, 'Peter', 154],
+                [3, 'Amy', 155],
+                [4, 'Hannah', null],
+                [5, 'Michael', null]
+            ];
+
+            connection.query(insertUsersSql, [userValues], function (error, result) {
+                if (error) {
+                    console.log(error);
+                    throw error;
+                }
+                console.log("Number of records inserted: " + result.affectedRows);
+            });
+        }
+    });
 
     connection.query("INSERT INTO customers (name, address) VALUES ('Company Inc " + Math.random() + "', 'Highway " + Math.random() + "')", function (error, result) {
         if (error) {
@@ -93,6 +164,15 @@ connection.connect(function (error) {
             throw error;
         }
         console.log("Number of records deleted: " + result.affectedRows);
+    });
+
+    connection.query("SELECT users.name AS user, products.name AS favorite FROM users " +
+        "JOIN products ON users.favorite_product = products.id", function (err, result) {
+        if (error) {
+            console.log(error);
+            throw error;
+        }
+        console.log(result);
     });
 });
 
