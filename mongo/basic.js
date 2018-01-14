@@ -79,7 +79,7 @@ function firstTimeout() {
         });
 
         query = {name: "Home"};
-        let newValues = { $set: {"name": "Mickey", "address": "Canyon 123" } };
+        let newValues = {$set: {"name": "Mickey", "address": "Canyon 123"}};
         dbase.collection("customers").updateOne(query, newValues, function (error, res) {
             if (error) throw error;
             console.log("1 document updated");
@@ -115,7 +115,7 @@ function thirdTimeout() {
         let dbase = db.db("mydb");
         dbase.collection("customers", function (error, collection) {
             if (error) throw error;
-            collection.remove({},function(error, removed){
+            collection.remove({}, function (error, removed) {
                 if (error) throw error;
                 console.log(removed);
             });
@@ -157,12 +157,24 @@ function fifthTimeout() {
             console.log(res);
         });
 
-        try {
-            dbase.collection("products").update({_id: 154, name: 'Chocolate Heaven'}, {upsert: true});
-            dbase.collection("products").update({_id: 155, name: 'Tasty Lemons'}, {upsert: true});
-            dbase.collection("products").update({_id: 156, name: 'Vanilla Dreams'}, {upsert: true});
-        } catch (ignore) {
-        }
+        dbase.collection("products").update({_id: 154, name: 'Chocolate Heaven'}, {upsert: true});
+        dbase.collection("products").update({_id: 155, name: 'Tasty Lemons'}, {upsert: true});
+        dbase.collection("products").update({_id: 156, name: 'Vanilla Dreams'}, {upsert: true});
+
+        //join
+        dbase.collection('orders').aggregate([
+            { $lookup:
+                    {
+                        from: 'products',
+                        localField: 'product_id',
+                        foreignField: '_id',
+                        as: 'orderdetails'
+                    }
+            }
+        ]).limit(1).toArray(function(err, docs) {
+            console.log(docs);
+        });
+
         db.close();
     });
 }
