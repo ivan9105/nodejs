@@ -157,9 +157,9 @@ function fifthTimeout() {
             console.log(res);
         });
 
-        dbase.collection("products").update({_id: 154, name: 'Chocolate Heaven'}, {upsert: true});
-        dbase.collection("products").update({_id: 155, name: 'Tasty Lemons'}, {upsert: true});
-        dbase.collection("products").update({_id: 156, name: 'Vanilla Dreams'}, {upsert: true});
+        dbase.collection("products").update({_id: 154}, {name: 'Chocolate Heaven'}, {upsert: true});
+        dbase.collection("products").update({_id: 155}, {name: 'Tasty Lemons'}, {upsert: true});
+        dbase.collection("products").update({_id: 156}, {name: 'Vanilla Dreams'}, {upsert: true});
 
         //join
         dbase.collection('orders').aggregate([
@@ -175,12 +175,57 @@ function fifthTimeout() {
             console.log(docs);
         });
 
+        //like
+        dbase.collection("products").find({name: /a/}).toArray(function(error, res) {
+            if (error) throw error;
+            console.log("Like example");
+            console.log(res);
+        });
+
+        db.close();
+    });
+}
+
+function sixthTimeout() {
+    MongoClient.connect(url, function (error, db) {
+        if (error) throw error;
+        console.log("Connected");
+
+        let dbase = db.db("mydb");
+
+        dbase.createCollection("range", function (error, res) {
+            if (error) throw error;
+            console.log("Collection products created!");
+            console.log(res);
+        });
+
+        dbase.collection("range").update({_id: 1}, {country: 'us', source: 'ARIN', status: 'NEW', createdDate: new Date('2016-05-03T08:52:32.434Z')}, {upsert: true});
+        dbase.collection("range").update({_id: 2}, {country: 'us', source: 'AFRINIC', status: 'NEW', createdDate: new Date('2016-05-03T08:52:32.434Z')}, {upsert: true});
+        dbase.collection("range").update({_id: 3}, {country: 'cn', source: 'APNIC', status: 'NEW', createdDate: new Date('2016-05-03T08:52:32.434Z')}, {upsert: true});
+        dbase.collection("range").update({_id: 4}, {country: 'eu', source: 'RIPE', status: 'NEW', createdDate: new Date('2016-05-03T08:52:32.434Z')}, {upsert: true});
+        dbase.collection("range").update({_id: 5}, {country: 'ru', source: 'RIPE', status: 'NEW', createdDate: new Date('2016-05-03T08:52:32.434Z')}, {upsert: true});
+        dbase.collection("range").update({_id: 6}, {country: 'ru', source: 'AFRINIC', status: 'NEW', createdDate: new Date('2016-05-03T08:52:32.434Z')}, {upsert: true});
+
+        //group by
+        dbase.collection('range').aggregate([
+            {
+                $group: {
+                    _id: {source: '$source', status: '$status'},
+                    count: {$sum: 1}
+                }
+            },
+            { $sort: {"_id.source": 1}}
+        ]).toArray(function (err, docs) {
+            console.log(docs);
+        });
+
         db.close();
     });
 }
 
 setTimeout(firstTimeout, 0);
-setTimeout(secondTimeout, 1500);
-setTimeout(thirdTimeout, 3000);
-setTimeout(fourthTimeout, 4500);
-setTimeout(fifthTimeout, 6000);
+setTimeout(secondTimeout, 350);
+setTimeout(thirdTimeout, 700);
+setTimeout(fourthTimeout, 1050);
+setTimeout(fifthTimeout, 1400);
+setTimeout(sixthTimeout, 1750);
