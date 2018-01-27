@@ -163,7 +163,8 @@ function fifthTimeout() {
 
         //join
         dbase.collection('orders').aggregate([
-            { $lookup:
+            {
+                $lookup:
                     {
                         from: 'products',
                         localField: 'product_id',
@@ -171,12 +172,12 @@ function fifthTimeout() {
                         as: 'orderdetails'
                     }
             }
-        ]).limit(1).toArray(function(err, docs) {
+        ]).limit(1).toArray(function (err, docs) {
             console.log(docs);
         });
 
         //like
-        dbase.collection("products").find({name: /a/}).toArray(function(error, res) {
+        dbase.collection("products").find({name: /a/}).toArray(function (error, res) {
             if (error) throw error;
             console.log("Like example");
             console.log(res);
@@ -199,12 +200,42 @@ function sixthTimeout() {
             console.log(res);
         });
 
-        dbase.collection("range").update({_id: 1}, {country: 'us', source: 'ARIN', status: 'NEW', createdDate: new Date('2016-05-03T08:52:32.434Z')}, {upsert: true});
-        dbase.collection("range").update({_id: 2}, {country: 'us', source: 'AFRINIC', status: 'NEW', createdDate: new Date('2016-05-03T08:52:32.434Z')}, {upsert: true});
-        dbase.collection("range").update({_id: 3}, {country: 'cn', source: 'APNIC', status: 'NEW', createdDate: new Date('2016-05-03T08:52:32.434Z')}, {upsert: true});
-        dbase.collection("range").update({_id: 4}, {country: 'eu', source: 'RIPE', status: 'NEW', createdDate: new Date('2016-05-03T08:52:32.434Z')}, {upsert: true});
-        dbase.collection("range").update({_id: 5}, {country: 'ru', source: 'RIPE', status: 'NEW', createdDate: new Date('2016-05-03T08:52:32.434Z')}, {upsert: true});
-        dbase.collection("range").update({_id: 6}, {country: 'ru', source: 'AFRINIC', status: 'NEW', createdDate: new Date('2016-05-03T08:52:32.434Z')}, {upsert: true});
+        dbase.collection("range").update({_id: 1}, {
+            country: 'us',
+            source: 'ARIN',
+            status: 'NEW',
+            createdDate: new Date('2016-05-03T08:52:32.434Z')
+        }, {upsert: true});
+        dbase.collection("range").update({_id: 2}, {
+            country: 'us',
+            source: 'AFRINIC',
+            status: 'NEW',
+            createdDate: new Date('2016-05-03T08:52:32.434Z')
+        }, {upsert: true});
+        dbase.collection("range").update({_id: 3}, {
+            country: 'cn',
+            source: 'APNIC',
+            status: 'NEW',
+            createdDate: new Date('2016-05-03T08:52:32.434Z')
+        }, {upsert: true});
+        dbase.collection("range").update({_id: 4}, {
+            country: 'eu',
+            source: 'RIPE',
+            status: 'NEW',
+            createdDate: new Date('2016-05-03T08:52:32.434Z')
+        }, {upsert: true});
+        dbase.collection("range").update({_id: 5}, {
+            country: 'ru',
+            source: 'RIPE',
+            status: 'NEW',
+            createdDate: new Date('2016-05-03T08:52:32.434Z')
+        }, {upsert: true});
+        dbase.collection("range").update({_id: 6}, {
+            country: 'ru',
+            source: 'AFRINIC',
+            status: 'NEW',
+            createdDate: new Date('2016-05-03T08:52:32.434Z')
+        }, {upsert: true});
 
         //group by
         dbase.collection('range').aggregate([
@@ -214,12 +245,70 @@ function sixthTimeout() {
                     count: {$sum: 1}
                 }
             },
-            { $sort: {"_id.source": 1}}
+            {$sort: {"_id.source": 1}}
         ]).toArray(function (err, docs) {
             console.log(docs);
         });
 
-        db.close();
+        //alter collection
+        let count = 1;
+        dbase.collection("range").find().forEach(function (doc) {
+            let source = doc.source;
+            dbase.collection("range").update(
+                {_id: doc._id},
+                {
+                    source: {
+                        _id: count.toString(),
+                        name: source
+                    },
+                    country: doc.country,
+                    status: doc.status,
+                    createdDate: doc.createdDate
+                }
+            );
+        });
+
+        let dbClose = function () {
+            db.close();
+        };
+
+        setTimeout(dbClose, 6000);
+    });
+}
+
+function seventhTimeout() {
+    MongoClient.connect(url, function (error, db) {
+        if (error) throw error;
+        console.log("Connected");
+
+        let dbase = db.db("mydb");
+
+        dbase.createCollection("unique", function (error, res) {
+            if (error) throw error;
+            console.log("Collection products created!");
+            console.log(res);
+        });
+
+        dbase.collection("unique").createIndex({"email": 1}, {unique: true});
+
+
+        dbase.collection("unique").update({_id: 1}, {
+            email: 'example@example.net'
+        }, {upsert: true});
+
+
+        dbase.collection("unique").update({_id: 2}, {
+            email: 'example@example.net'
+        }, {upsert: true}, function (error, res) {
+            if (error) console.log("Duplicate index error: " + error);
+        });
+
+
+        let dbClose = function () {
+            db.close();
+        };
+
+        setTimeout(dbClose, 300)
     });
 }
 
@@ -229,3 +318,4 @@ setTimeout(thirdTimeout, 700);
 setTimeout(fourthTimeout, 1050);
 setTimeout(fifthTimeout, 1400);
 setTimeout(sixthTimeout, 1750);
+setTimeout(seventhTimeout, 2000);
