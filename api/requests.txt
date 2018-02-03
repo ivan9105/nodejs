@@ -1,0 +1,41 @@
+1)get http://localhost:1337/api/articles
+
+2) post http://localhost:1337/api/articles
+body
+{
+	"title":"TestArticle",
+	"author":"John Doe",
+	"description":"lorem ipsum dolar sit amet",
+	"images":[
+		{
+			"kind":"thumbnail",
+			"url":"http://habrahabr.ru/images/write-topic.png"
+		},
+		{
+			"kind":"detail",
+			"url":"http://habrahabr.ru/images/write-topic.png"
+		}
+		]
+}
+
+3) get http://localhost:1337/api/articles/5a75aa1f90cb0f0a8c028d9c
+
+4) put http://localhost:1337/api/articles/5a75aa1f90cb0f0a8c028d9c
+body
+{
+	"title":"TestArticle22222",
+	"author":"John Doe",
+	"description":"lorem ipsum dolar sit amet",
+	"images":[
+		{
+			"kind":"thumbnail",
+			"url":"http://habrahabr.ru/images/write-topic.png"
+		},
+		{
+			"kind":"detail",
+			"url":"http://habrahabr.ru/images/write-topic.png"
+		}
+		]
+}
+
+5) delete http://localhost:1337/api/articles/5a75aa1f90cb0f0a8c028d9c
